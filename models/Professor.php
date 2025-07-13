@@ -6,6 +6,7 @@ class Professor {
     public $id;
     public $nome;
     public $email;
+    public $whatsapp;
     public $instituicao;
     public $area_atuacao;
     public $interessado_edicoes_futuras;
@@ -16,13 +17,14 @@ class Professor {
 
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                  (nome, email, instituicao, area_atuacao, interessado_edicoes_futuras) 
-                  VALUES (:nome, :email, :instituicao, :area_atuacao, :interessado_edicoes_futuras)";
+                  (nome, email, whatsapp, instituicao, area_atuacao, interessado_edicoes_futuras) 
+                  VALUES (:nome, :email, :whatsapp, :instituicao, :area_atuacao, :interessado_edicoes_futuras)";
 
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(":nome", $this->nome);
         $stmt->bindParam(":email", $this->email);
+        $stmt->bindParam(":whatsapp", $this->whatsapp);
         $stmt->bindParam(":instituicao", $this->instituicao);
         $stmt->bindParam(":area_atuacao", $this->area_atuacao);
         $stmt->bindParam(":interessado_edicoes_futuras", $this->interessado_edicoes_futuras);
@@ -59,7 +61,7 @@ class Professor {
 
     public function update() {
         $query = "UPDATE " . $this->table_name . " 
-                  SET nome = :nome, email = :email, instituicao = :instituicao, 
+                  SET nome = :nome, email = :email, whatsapp = :whatsapp, instituicao = :instituicao, 
                       area_atuacao = :area_atuacao, interessado_edicoes_futuras = :interessado_edicoes_futuras
                   WHERE id = :id";
 
@@ -68,6 +70,7 @@ class Professor {
         $stmt->bindParam(":id", $this->id);
         $stmt->bindParam(":nome", $this->nome);
         $stmt->bindParam(":email", $this->email);
+        $stmt->bindParam(":whatsapp", $this->whatsapp);
         $stmt->bindParam(":instituicao", $this->instituicao);
         $stmt->bindParam(":area_atuacao", $this->area_atuacao);
         $stmt->bindParam(":interessado_edicoes_futuras", $this->interessado_edicoes_futuras);
@@ -84,6 +87,14 @@ class Professor {
 
     public function count() {
         $query = "SELECT COUNT(*) as total FROM " . $this->table_name;
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['total'];
+    }
+
+    public function countInteressados() {
+        $query = "SELECT COUNT(*) as total FROM " . $this->table_name . " WHERE interessado_edicoes_futuras = 1";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);

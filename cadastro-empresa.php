@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $empresa->bairro = $_POST['bairro'];
             $empresa->cidade = $_POST['cidade'];
             $empresa->estado = $_POST['estado'];
+            $empresa->user_level = 'empresa'; // Definir nível padrão como empresa
             
             if ($empresa->create()) {
                 $_SESSION['empresa_id'] = $empresa->id;
@@ -150,7 +151,7 @@ include 'includes/header.php';
                         <div class="alert alert-danger"><?php echo $error; ?></div>
                     <?php endif; ?>
                     
-                    <form method="POST" id="empresaForm">
+                    <form method="POST" id="empresaForm" autocomplete="off">
                         <h3 class="form-title">Dados da Empresa</h3>
                         
                         <div class="row">
@@ -191,14 +192,16 @@ include 'includes/header.php';
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="email" class="form-label">Email *</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           autocomplete="off" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="password" class="form-label">Senha *</label>
                                     <input type="password" class="form-control" id="password" name="password" 
-                                           placeholder="Mínimo 6 caracteres" required minlength="6">
+                                           placeholder="Mínimo 6 caracteres" autocomplete="new-password" 
+                                           required minlength="6">
                                 </div>
                             </div>
                         </div>
@@ -208,7 +211,7 @@ include 'includes/header.php';
                                 <div class="form-group">
                                     <label for="confirm_password" class="form-label">Confirmar Senha *</label>
                                     <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
-                                           placeholder="Digite a senha novamente" required>
+                                           placeholder="Digite a senha novamente" autocomplete="new-password" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -317,87 +320,271 @@ include 'includes/header.php';
 </div>
 
 <script>
-// Máscara para CNPJ
-document.getElementById('cnpj').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    value = value.replace(/^(\d{2})(\d)/, '$1.$2');
-    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-    value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
-    value = value.replace(/(\d{4})(\d)/, '$1-$2');
-    e.target.value = value;
-});
-
-// Máscara para WhatsApp
-document.getElementById('whatsapp').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    value = value.replace(/^(\d{2})(\d)/, '($1) $2');
-    value = value.replace(/(\d{5})(\d)/, '$1-$2');
-    e.target.value = value;
-});
-
-// Máscara para CEP
-document.getElementById('cep').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    value = value.replace(/^(\d{5})(\d)/, '$1-$2');
-    e.target.value = value;
-});
-
-// Buscar dados do CNPJ
-document.getElementById('cnpj').addEventListener('blur', function(e) {
-    const cnpj = e.target.value.replace(/\D/g, '');
-    if (cnpj.length === 14) {
-        document.getElementById('cnpjLoading').style.display = 'block';
-        
-        // Simular busca de CNPJ (em produção, usar API real)
-        setTimeout(() => {
-            // Aqui você pode integrar com uma API real de consulta de CNPJ
-            // Por enquanto, vamos apenas simular
-            document.getElementById('cnpjLoading').style.display = 'none';
-            
-            // Exemplo de preenchimento automático (remover em produção)
-            if (cnpj === '00000000000000') {
-                document.getElementById('razao_social').value = 'Empresa Exemplo LTDA';
-                document.getElementById('nome_fantasia').value = 'Empresa Exemplo';
-                document.getElementById('cep').value = '01234-567';
-                document.getElementById('endereco').value = 'Rua Exemplo, 123';
-                document.getElementById('bairro').value = 'Centro';
-                document.getElementById('cidade').value = 'São Paulo';
-                document.getElementById('estado').value = 'SP';
-            }
-        }, 2000);
-    }
-});
-
-// Validação de senha
-document.getElementById('confirm_password').addEventListener('input', function(e) {
-    const password = document.getElementById('password').value;
-    const confirmPassword = e.target.value;
+// Função para preencher dados da empresa
+function preencherDadosEmpresa(razaoSocial, nomeFantasia, cep, endereco, bairro, cidade, estado) {
+    console.log('=== PREENCHENDO DADOS DA EMPRESA ===');
+    console.log('Razão Social:', razaoSocial);
+    console.log('Nome Fantasia:', nomeFantasia);
+    console.log('CEP:', cep);
+    console.log('Endereço:', endereco);
+    console.log('Bairro:', bairro);
+    console.log('Cidade:', cidade);
+    console.log('Estado:', estado);
     
-    if (password !== confirmPassword) {
-        e.target.setCustomValidity('As senhas não coincidem');
+    // Preencher razão social
+    const razaoSocialField = document.getElementById('razao_social');
+    if (razaoSocialField) {
+        razaoSocialField.value = razaoSocial;
+        console.log('✓ Razão social preenchida:', razaoSocialField.value);
     } else {
-        e.target.setCustomValidity('');
+        console.error('✗ Campo razão social não encontrado!');
     }
-});
+    
+    // Preencher nome fantasia
+    const nomeFantasiaField = document.getElementById('nome_fantasia');
+    if (nomeFantasiaField) {
+        nomeFantasiaField.value = nomeFantasia;
+        console.log('✓ Nome fantasia preenchido:', nomeFantasiaField.value);
+    } else {
+        console.error('✗ Campo nome fantasia não encontrado!');
+    }
+    
+    // Preencher CEP
+    const cepField = document.getElementById('cep');
+    if (cepField) {
+        cepField.value = cep;
+        console.log('✓ CEP preenchido:', cepField.value);
+    } else {
+        console.error('✗ Campo CEP não encontrado!');
+    }
+    
+    // Preencher endereço
+    const enderecoField = document.getElementById('endereco');
+    if (enderecoField) {
+        enderecoField.value = endereco;
+        console.log('✓ Endereço preenchido:', enderecoField.value);
+    } else {
+        console.error('✗ Campo endereço não encontrado!');
+    }
+    
+    // Preencher bairro
+    const bairroField = document.getElementById('bairro');
+    if (bairroField) {
+        bairroField.value = bairro;
+        console.log('✓ Bairro preenchido:', bairroField.value);
+    } else {
+        console.error('✗ Campo bairro não encontrado!');
+    }
+    
+    // Preencher cidade
+    const cidadeField = document.getElementById('cidade');
+    if (cidadeField) {
+        cidadeField.value = cidade;
+        console.log('✓ Cidade preenchida:', cidadeField.value);
+    } else {
+        console.error('✗ Campo cidade não encontrado!');
+    }
+    
+    // Preencher estado
+    const estadoField = document.getElementById('estado');
+    if (estadoField) {
+        estadoField.value = estado;
+        console.log('✓ Estado preenchido:', estadoField.value);
+    } else {
+        console.error('✗ Campo estado não encontrado!');
+    }
+    
+    console.log('=== PREENCHIMENTO CONCLUÍDO ===');
+}
 
-// Validação do formulário
-document.getElementById('empresaForm').addEventListener('submit', function(e) {
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirm_password').value;
+// Aguardar o DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== SCRIPT INICIADO ===');
+    console.log('DOM carregado - iniciando máscaras e eventos');
     
-    if (password !== confirmPassword) {
-        e.preventDefault();
-        alert('As senhas não coincidem!');
-        document.getElementById('confirm_password').focus();
-        return false;
+    // Limpar campos sensíveis ao carregar a página
+    const emailField = document.getElementById('email');
+    const passwordField = document.getElementById('password');
+    const confirmPasswordField = document.getElementById('confirm_password');
+    
+    if (emailField) {
+        emailField.value = '';
+        console.log('✓ Campo email limpo');
+    }
+    if (passwordField) {
+        passwordField.value = '';
+        console.log('✓ Campo senha limpo');
+    }
+    if (confirmPasswordField) {
+        confirmPasswordField.value = '';
+        console.log('✓ Campo confirmar senha limpo');
     }
     
-    if (password.length < 6) {
-        e.preventDefault();
-        alert('A senha deve ter pelo menos 6 caracteres!');
-        document.getElementById('password').focus();
-        return false;
+    // Máscara para CNPJ
+    const cnpjInput = document.getElementById('cnpj');
+    if (cnpjInput) {
+        console.log('✓ Campo CNPJ encontrado com sucesso');
+        console.log('ID do campo:', cnpjInput.id);
+        console.log('Tipo do campo:', cnpjInput.type);
+        console.log('Placeholder:', cnpjInput.placeholder);
+        
+        cnpjInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+            value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+            value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+            value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+
+        // Buscar dados do CNPJ quando sair do campo
+        cnpjInput.addEventListener('blur', function(e) {
+            const cnpj = e.target.value.replace(/\D/g, '');
+            console.log('=== EVENTO BLUR DO CNPJ ===');
+            console.log('CNPJ digitado:', cnpj);
+            console.log('CNPJ com máscara:', e.target.value);
+            
+            if (cnpj.length === 14) {
+                console.log('✓ CNPJ válido detectado (14 dígitos), iniciando busca...');
+                
+                // Mostrar loading
+                const loadingElement = document.getElementById('cnpjLoading');
+                if (loadingElement) {
+                    loadingElement.style.display = 'block';
+                    console.log('✓ Loading exibido');
+                } else {
+                    console.error('✗ Elemento loading não encontrado');
+                }
+                
+                // Simular busca de CNPJ
+                setTimeout(() => {
+                    // Esconder loading
+                    if (loadingElement) {
+                        loadingElement.style.display = 'none';
+                        console.log('✓ Loading ocultado');
+                    }
+                    
+                    console.log('=== INICIANDO PREENCHIMENTO PARA CNPJ:', cnpj, '===');
+                    
+                    // Dados específicos para CNPJs de teste
+                    if (cnpj === '00000000000000') {
+                        console.log('🎯 Preenchendo dados da Empresa Exemplo');
+                        preencherDadosEmpresa(
+                            'Empresa Exemplo LTDA',
+                            'Empresa Exemplo',
+                            '01234-567',
+                            'Rua Exemplo, 123',
+                            'Centro',
+                            'São Paulo',
+                            'SP'
+                        );
+                    } else if (cnpj === '12345678000190') {
+                        console.log('🎯 Preenchendo dados da Tech Solutions');
+                        preencherDadosEmpresa(
+                            'Tech Solutions LTDA',
+                            'Tech Solutions',
+                            '04567-890',
+                            'Av. Paulista, 1000',
+                            'Bela Vista',
+                            'São Paulo',
+                            'SP'
+                        );
+                    } else if (cnpj === '98765432000110') {
+                        console.log('🎯 Preenchendo dados da Inovação Digital');
+                        preencherDadosEmpresa(
+                            'Inovação Digital ME',
+                            'Inovação Digital',
+                            '20040-007',
+                            'Rua do Ouvidor, 50',
+                            'Centro',
+                            'Rio de Janeiro',
+                            'RJ'
+                        );
+                    } else {
+                        console.log('🎯 Preenchendo dados genéricos para CNPJ:', cnpj);
+                        // Para qualquer CNPJ válido, preencher com dados genéricos
+                        const nomeEmpresa = 'Empresa ' + cnpj.substring(0, 4);
+                        preencherDadosEmpresa(
+                            nomeEmpresa + ' LTDA',
+                            nomeEmpresa,
+                            '00000-000',
+                            'Endereço da Empresa',
+                            'Bairro',
+                            'Cidade',
+                            'SP'
+                        );
+                    }
+                    
+                    console.log('✅ Preenchimento concluído com sucesso');
+                }, 1000);
+            } else {
+                console.log('❌ CNPJ inválido ou incompleto (tamanho:', cnpj.length, ')');
+            }
+        });
+    } else {
+        console.log('Campo CNPJ NÃO encontrado');
     }
+
+    // Máscara para WhatsApp
+    const whatsappInput = document.getElementById('whatsapp');
+    if (whatsappInput) {
+        whatsappInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+    }
+
+    // Máscara para CEP
+    const cepInput = document.getElementById('cep');
+    if (cepInput) {
+        cepInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+    }
+
+    // Validação de senha
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = e.target.value;
+            
+            if (password !== confirmPassword) {
+                e.target.setCustomValidity('As senhas não coincidem');
+            } else {
+                e.target.setCustomValidity('');
+            }
+        });
+    }
+
+    // Validação do formulário
+    const form = document.getElementById('empresaForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('As senhas não coincidem!');
+                document.getElementById('confirm_password').focus();
+                return false;
+            }
+            
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('A senha deve ter pelo menos 6 caracteres!');
+                document.getElementById('password').focus();
+                return false;
+            }
+        });
+    }
+    
+    console.log('Todos os eventos configurados');
 });
 </script>
 

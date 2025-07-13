@@ -37,7 +37,8 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="index.php">
-                <i class="fas fa-users me-2"></i>ProTalent
+                <img src="imgs/logo_protalent_preto.png" alt="ProTalent" height="30" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                <i class="fas fa-users me-2" style="display: none;">ProTalent</i>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -49,12 +50,13 @@
                             <i class="fas fa-home me-1"></i>Início
                         </a>
                     </li>
+                    <?php if(isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'admin'): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="talents.php">
-                            <i class="fas fa-user-tie me-1"></i>Talentos
+                        <a class="nav-link" href="admin-dashboard.php">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                         </a>
                     </li>
-                    <?php if(isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'admin'): ?>
+
                     <li class="nav-item">
                         <a class="nav-link" href="users.php">
                             <i class="fas fa-users-cog me-1"></i>Usuários

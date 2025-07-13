@@ -19,7 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['user_email'] = $user->email;
         $_SESSION['user_role'] = $user->role;
         
-        header("Location: index.php");
+        // Redirecionar baseado no nível do usuário
+        if ($user->role === 'admin') {
+            header("Location: admin-dashboard.php");
+        } else {
+            header("Location: index.php");
+        }
         exit();
     } else {
         $error = 'Email ou senha incorretos!';

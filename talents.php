@@ -1,8 +1,8 @@
 <?php
 session_start();
 
-// Verificar se usuário está logado
-if (!isset($_SESSION['user_id'])) {
+// Verificar se usuário está logado e é admin
+if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 'admin') {
     header("Location: login.php");
     exit();
 }

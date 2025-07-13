@@ -10,6 +10,8 @@ class Desafio {
     public $titulo;
     public $descricao_problema;
     public $pesquisado;
+    public $descricao_pesquisa;
+    public $nivel_trl;
     public $requisitos_especificos;
     public $descricao_requisitos;
     public $status;
@@ -21,9 +23,9 @@ class Desafio {
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
                   (empresa_id, mentor, whatsapp, titulo, descricao_problema, 
-                   pesquisado, requisitos_especificos, descricao_requisitos, status) 
+                   pesquisado, descricao_pesquisa, nivel_trl, requisitos_especificos, descricao_requisitos, status) 
                   VALUES (:empresa_id, :mentor, :whatsapp, :titulo, :descricao_problema,
-                          :pesquisado, :requisitos_especificos, :descricao_requisitos, :status)";
+                          :pesquisado, :descricao_pesquisa, :nivel_trl, :requisitos_especificos, :descricao_requisitos, :status)";
 
         $stmt = $this->conn->prepare($query);
 
@@ -33,6 +35,8 @@ class Desafio {
         $stmt->bindParam(":titulo", $this->titulo);
         $stmt->bindParam(":descricao_problema", $this->descricao_problema);
         $stmt->bindParam(":pesquisado", $this->pesquisado);
+        $stmt->bindParam(":descricao_pesquisa", $this->descricao_pesquisa);
+        $stmt->bindParam(":nivel_trl", $this->nivel_trl);
         $stmt->bindParam(":requisitos_especificos", $this->requisitos_especificos);
         $stmt->bindParam(":descricao_requisitos", $this->descricao_requisitos);
         $stmt->bindParam(":status", $this->status);
@@ -79,7 +83,8 @@ class Desafio {
         $query = "UPDATE " . $this->table_name . " 
                   SET empresa_id = :empresa_id, mentor = :mentor, whatsapp = :whatsapp,
                       titulo = :titulo, descricao_problema = :descricao_problema,
-                      pesquisado = :pesquisado, requisitos_especificos = :requisitos_especificos,
+                      pesquisado = :pesquisado, descricao_pesquisa = :descricao_pesquisa,
+                      nivel_trl = :nivel_trl, requisitos_especificos = :requisitos_especificos,
                       descricao_requisitos = :descricao_requisitos, status = :status
                   WHERE id = :id";
 
@@ -92,6 +97,8 @@ class Desafio {
         $stmt->bindParam(":titulo", $this->titulo);
         $stmt->bindParam(":descricao_problema", $this->descricao_problema);
         $stmt->bindParam(":pesquisado", $this->pesquisado);
+        $stmt->bindParam(":descricao_pesquisa", $this->descricao_pesquisa);
+        $stmt->bindParam(":nivel_trl", $this->nivel_trl);
         $stmt->bindParam(":requisitos_especificos", $this->requisitos_especificos);
         $stmt->bindParam(":descricao_requisitos", $this->descricao_requisitos);
         $stmt->bindParam(":status", $this->status);
@@ -135,6 +142,51 @@ class Desafio {
         $stmt = $this->conn->prepare($query);
         $termo = "%" . $termo . "%";
         $stmt->bindParam(":termo", $termo);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    public function readWithFilters($empresa_id = '', $cidade = '', $titulo = '', $nome_empresa = '', $nivel_trl = '') {
+        $query = "SELECT d.*, e.nome_fantasia as empresa_nome, e.cidade 
+                  FROM " . $this->table_name . " d
+                  LEFT JOIN empresas e ON d.empresa_id = e.id
+                  WHERE 1=1";
+        
+        $params = array();
+        
+        if (!empty($empresa_id)) {
+            $query .= " AND d.empresa_id = :empresa_id";
+            $params[':empresa_id'] = $empresa_id;
+        }
+        
+        if (!empty($cidade)) {
+            $query .= " AND e.cidade LIKE :cidade";
+            $params[':cidade'] = "%" . $cidade . "%";
+        }
+        
+        if (!empty($titulo)) {
+            $query .= " AND d.titulo LIKE :titulo";
+            $params[':titulo'] = "%" . $titulo . "%";
+        }
+        
+        if (!empty($nome_empresa)) {
+            $query .= " AND (e.nome_fantasia LIKE :nome_empresa OR e.razao_social LIKE :nome_empresa)";
+            $params[':nome_empresa'] = "%" . $nome_empresa . "%";
+        }
+        
+        if (!empty($nivel_trl)) {
+            $query .= " AND d.nivel_trl = :nivel_trl";
+            $params[':nivel_trl'] = $nivel_trl;
+        }
+        
+        $query .= " ORDER BY d.created_at DESC";
+        
+        $stmt = $this->conn->prepare($query);
+        
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        
         $stmt->execute();
         return $stmt;
     }

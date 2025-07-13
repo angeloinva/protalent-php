@@ -23,20 +23,47 @@ $total_empresas = $empresa->count();
 $termo_pesquisa = $_GET['pesquisa'] ?? '';
 $filtro_empresa = $_GET['empresa'] ?? '';
 $filtro_cidade = $_GET['cidade'] ?? '';
+$filtro_trl = $_GET['trl'] ?? '';
 
-if ($termo_pesquisa || $filtro_empresa || $filtro_cidade) {
-    if ($termo_pesquisa) {
-        $desafios = $desafio->search($termo_pesquisa);
-    }
-    // Para filtros mais específicos, seria necessário implementar métodos adicionais
+if ($termo_pesquisa || $filtro_empresa || $filtro_cidade || $filtro_trl) {
+    // Usar o método readWithFilters atualizado que inclui filtro por TRL
+    $desafios = $desafio->readWithFilters('', $filtro_cidade, $termo_pesquisa, $filtro_empresa, $filtro_trl);
 }
 
 // Processar interesse em edições futuras
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['interesse_edicoes'])) {
+    $nome = $_POST['nome'] ?? '';
     $email = $_POST['email'] ?? '';
-    if ($email) {
-        $professor->updateInteresseEdicoesFuturas($email, 1);
-        $success_message = 'Interesse registrado com sucesso!';
+    $whatsapp = $_POST['whatsapp'] ?? '';
+    
+    if ($nome && $email) {
+        // Verificar se já existe um professor com este email
+        $professor_existente = $professor->readByEmail($email);
+        
+        if ($professor_existente) {
+            // Atualizar interesse do professor existente
+            if ($professor->updateInteresseEdicoesFuturas($email, 1)) {
+                $success_message = 'Interesse atualizado com sucesso! Em breve entraremos em contato.';
+            } else {
+                $error_message = 'Erro ao atualizar interesse. Tente novamente.';
+            }
+        } else {
+            // Criar novo professor interessado
+            $professor->nome = $nome;
+            $professor->email = $email;
+            $professor->whatsapp = $whatsapp;
+            $professor->instituicao = ''; // Pode ser preenchido depois
+            $professor->area_atuacao = ''; // Pode ser preenchido depois
+            $professor->interessado_edicoes_futuras = 1;
+            
+            if ($professor->create()) {
+                $success_message = 'Interesse registrado com sucesso! Em breve entraremos em contato.';
+            } else {
+                $error_message = 'Erro ao registrar interesse. Tente novamente.';
+            }
+        }
+    } else {
+        $error_message = 'Por favor, preencha pelo menos o nome e email.';
     }
 }
 
@@ -333,20 +360,34 @@ include 'includes/header.php';
             <i class="fas fa-search me-2"></i>Pesquisar Desafios
         </h5>
         <form method="GET" class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <input type="text" class="form-control" name="pesquisa" 
                        placeholder="Pesquisar por título ou descrição..." 
                        value="<?php echo htmlspecialchars($termo_pesquisa); ?>">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <input type="text" class="form-control" name="empresa" 
                        placeholder="Filtrar por empresa" 
                        value="<?php echo htmlspecialchars($filtro_empresa); ?>">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <input type="text" class="form-control" name="cidade" 
                        placeholder="Filtrar por cidade" 
                        value="<?php echo htmlspecialchars($filtro_cidade); ?>">
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" name="trl">
+                    <option value="">Todos os níveis TRL</option>
+                    <option value="TRL 1" <?php echo $filtro_trl == 'TRL 1' ? 'selected' : ''; ?>>TRL 1 - Princípios básicos</option>
+                    <option value="TRL 2" <?php echo $filtro_trl == 'TRL 2' ? 'selected' : ''; ?>>TRL 2 - Conceito tecnológico</option>
+                    <option value="TRL 3" <?php echo $filtro_trl == 'TRL 3' ? 'selected' : ''; ?>>TRL 3 - Prova de conceito</option>
+                    <option value="TRL 4" <?php echo $filtro_trl == 'TRL 4' ? 'selected' : ''; ?>>TRL 4 - Validação em laboratório</option>
+                    <option value="TRL 5" <?php echo $filtro_trl == 'TRL 5' ? 'selected' : ''; ?>>TRL 5 - Validação em ambiente relevante</option>
+                    <option value="TRL 6" <?php echo $filtro_trl == 'TRL 6' ? 'selected' : ''; ?>>TRL 6 - Demonstração em ambiente relevante</option>
+                    <option value="TRL 7" <?php echo $filtro_trl == 'TRL 7' ? 'selected' : ''; ?>>TRL 7 - Protótipo em ambiente operacional</option>
+                    <option value="TRL 8" <?php echo $filtro_trl == 'TRL 8' ? 'selected' : ''; ?>>TRL 8 - Sistema completo qualificado</option>
+                    <option value="TRL 9" <?php echo $filtro_trl == 'TRL 9' ? 'selected' : ''; ?>>TRL 9 - Sistema real comprovado</option>
+                </select>
             </div>
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">
@@ -366,29 +407,29 @@ include 'includes/header.php';
             <div class="timeline-item">
                 <div class="timeline-content">
                     <div class="timeline-date">Semana 1-2</div>
-                    <div class="timeline-title">Análise e Planejamento</div>
-                    <div class="timeline-description">Entendimento do problema e definição da abordagem</div>
+                    <div class="timeline-title">Entendimento do desafio</div>
+                    <div class="timeline-description">Entendimento do problema e agenda de kick-off</div>
                 </div>
             </div>
             <div class="timeline-item">
                 <div class="timeline-content">
-                    <div class="timeline-date">Semana 3-6</div>
-                    <div class="timeline-title">Desenvolvimento</div>
-                    <div class="timeline-description">Implementação da solução proposta</div>
+                    <div class="timeline-date">Semana 3-7</div>
+                    <div class="timeline-title">Desenvolvimento da solução</div>
+                    <div class="timeline-description">Metodologias ágeis e início do desenvolvimento da solução proposta</div>
                 </div>
             </div>
             <div class="timeline-item">
                 <div class="timeline-content">
-                    <div class="timeline-date">Semana 7-8</div>
-                    <div class="timeline-title">Testes e Validação</div>
-                    <div class="timeline-description">Testes da solução e ajustes finais</div>
-                </div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-content">
-                    <div class="timeline-date">Semana 9</div>
-                    <div class="timeline-title">Entrega e Apresentação</div>
+                    <div class="timeline-date">Semana 8-9</div>
+                    <div class="timeline-title">Banca parcial</div>
                     <div class="timeline-description">Apresentação da solução para a empresa</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-date">Semana 12</div>
+                    <div class="timeline-title">Entrega final da solução</div>
+                    <div class="timeline-description">Apresentação da solução para a empresa, seja presencial ou em vídeo</div>
                 </div>
             </div>
         </div>
@@ -403,10 +444,22 @@ include 'includes/header.php';
             Cadastre seu interesse para receber notificações sobre novos desafios e oportunidades
         </p>
         <form method="POST" class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="input-group">
-                    <input type="email" class="form-control" name="email" 
-                           placeholder="Seu email" required>
+            <div class="col-md-8">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" name="nome" 
+                               placeholder="Seu nome completo" required>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="email" class="form-control" name="email" 
+                               placeholder="Seu email" required>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" name="whatsapp" 
+                               placeholder="WhatsApp (11) 99999-9999">
+                    </div>
+                </div>
+                <div class="text-center mt-3">
                     <button type="submit" name="interesse_edicoes" class="btn btn-interesse">
                         <i class="fas fa-check me-2"></i>Cadastrar Interesse
                     </button>
@@ -416,6 +469,11 @@ include 'includes/header.php';
         <?php if (isset($success_message)): ?>
             <div class="alert alert-success mt-3">
                 <?php echo $success_message; ?>
+            </div>
+        <?php endif; ?>
+        <?php if (isset($error_message)): ?>
+            <div class="alert alert-danger mt-3">
+                <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
     </div>
@@ -448,12 +506,20 @@ include 'includes/header.php';
                                         <i class="fas fa-calendar me-1"></i>
                                         <?php echo date('d/m/Y', strtotime($row['created_at'])); ?>
                                     </div>
-                                    <span class="desafio-status status-<?php echo $row['status']; ?>">
-                                        <?php 
-                                        echo $row['status'] == 'ativo' ? 'Ativo' : 
-                                            ($row['status'] == 'em_andamento' ? 'Em Andamento' : 'Concluído'); 
-                                        ?>
-                                    </span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <?php if ($row['nivel_trl']): ?>
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-layer-group me-1"></i>
+                                                <?php echo htmlspecialchars($row['nivel_trl']); ?>
+                                            </span>
+                                        <?php endif; ?>
+                                        <span class="desafio-status status-<?php echo $row['status']; ?>">
+                                            <?php 
+                                            echo $row['status'] == 'ativo' ? 'Ativo' : 
+                                                ($row['status'] == 'em_andamento' ? 'Em Andamento' : 'Concluído'); 
+                                            ?>
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="desafio-actions">
                                     <a href="visualizar-desafio.php?id=<?php echo $row['id']; ?>" 
@@ -495,6 +561,19 @@ function toggleTimeline() {
         timelineIcon.className = 'fas fa-chevron-down ms-2';
     }
 }
+
+// Máscara para WhatsApp no formulário de interesse
+document.addEventListener('DOMContentLoaded', function() {
+    const whatsappInput = document.querySelector('input[name="whatsapp"]');
+    if (whatsappInput) {
+        whatsappInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+    }
+});
 </script>
 
 <?php include 'includes/footer.php'; ?> 

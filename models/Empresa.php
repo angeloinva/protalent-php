@@ -18,6 +18,7 @@ class Empresa {
     public $bairro;
     public $cidade;
     public $estado;
+    public $user_level;
 
     public function __construct($db) {
         $this->conn = $db;
@@ -26,9 +27,9 @@ class Empresa {
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
                   (cnpj, razao_social, nome_fantasia, nome_mentor, email, password, whatsapp, 
-                   cep, endereco, numero, complemento, bairro, cidade, estado) 
+                   cep, endereco, numero, complemento, bairro, cidade, estado, user_level) 
                   VALUES (:cnpj, :razao_social, :nome_fantasia, :nome_mentor, :email, :password, :whatsapp,
-                          :cep, :endereco, :numero, :complemento, :bairro, :cidade, :estado)";
+                          :cep, :endereco, :numero, :complemento, :bairro, :cidade, :estado, :user_level)";
 
         $stmt = $this->conn->prepare($query);
 
@@ -46,6 +47,7 @@ class Empresa {
         $stmt->bindParam(":bairro", $this->bairro);
         $stmt->bindParam(":cidade", $this->cidade);
         $stmt->bindParam(":estado", $this->estado);
+        $stmt->bindParam(":user_level", $this->user_level);
 
         if ($stmt->execute()) {
             $this->id = $this->conn->lastInsertId();

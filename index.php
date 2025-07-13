@@ -133,8 +133,8 @@ include 'includes/header.php';
 
 <div class="hero-section">
     <div class="container">
-        <div class="logo-section">
-            <img src="imgs/logo_protalent_branco.png" alt="ProTalent" onerror="this.style.display='none'">
+        <div >
+            <img src="imgs/logo_protalent_branco.png" alt="ProTalent" onerror="this.style.display='none'" width="80%">
             
         </div>
         
