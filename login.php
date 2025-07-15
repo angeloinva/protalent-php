@@ -2,29 +2,40 @@
 session_start();
 require_once 'config/database.php';
 require_once 'models/User.php';
+require_once 'models/Empresa.php'; // Added this line for Empresa model
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $database = new Database();
     $db = $database->getConnection();
+
     $user = new User($db);
-    
+    $empresa = new Empresa($db);
+
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
-    
+
     if ($user->authenticate($email, $password)) {
+        // Login como usuário comum
         $_SESSION['user_id'] = $user->id;
-        $_SESSION['user_name'] = $user->name;
+        $_SESSION['user_name'] = $user->nome;
         $_SESSION['user_email'] = $user->email;
-        $_SESSION['user_role'] = $user->role;
-        
-        // Redirecionar baseado no nível do usuário
-        if ($user->role === 'admin') {
-            header("Location: admin-dashboard.php");
-        } else {
-            header("Location: index.php");
-        }
+        $_SESSION['user_role'] = $user->tipo;
+        // Redireciona para dashboard de usuário
+        header("Location: index.php");
+        exit();
+    } elseif ($empresa->authenticate($email, $password)) {
+        // Login como empresa
+        $_SESSION['empresa_id'] = $empresa->id;
+        $_SESSION['empresa_nome'] = $empresa->nome_fantasia ?: $empresa->razao_social;
+        $_SESSION['user_type'] = 'empresa';
+        // Redireciona para dashboard de empresa
+        header("Location: empresa-dashboard.php");
         exit();
     } else {
         $error = 'Email ou senha incorretos!';

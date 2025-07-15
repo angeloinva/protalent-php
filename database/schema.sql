@@ -1,30 +1,29 @@
 -- Criação do banco de dados
-CREATE DATABASE IF NOT EXISTS protalent CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE protalent;
+CREATE DATABASE IF NOT EXISTS protalentappbr_protalent
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
 
--- Tabela de usuários
+USE protalentappbr_protalent;
+
+-- Criação da tabela de usuários
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'empresa', 'prestador', 'professor') DEFAULT 'empresa',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    tipo ENUM('admin', 'empresa', 'professor', 'talent') NOT NULL DEFAULT 'talent',
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de talentos
+-- Criação da tabela de talentos
 CREATE TABLE IF NOT EXISTS talents (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    phone VARCHAR(20),
-    skills TEXT,
-    experience_years INT DEFAULT 0,
-    salary_expectation DECIMAL(10,2),
-    status ENUM('available', 'hired', 'inactive') DEFAULT 'available',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    telefone VARCHAR(20),
+    curso VARCHAR(100),
+    semestre INT,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Tabela de empresas
@@ -82,11 +81,11 @@ CREATE TABLE IF NOT EXISTS desafios (
 );
 
 -- Inserir usuário admin padrão (senha: admin123) - apenas se não existir
-INSERT IGNORE INTO users (name, email, password, role) VALUES 
-('Administrador', 'admin@protalent.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+INSERT IGNORE INTO users (nome, email, password, tipo) VALUES 
+('Administrador', 'admin@protalent.com', '$2y$10$abcdefghijklmnopqrstuv1234567890abcdefghi1234567890abcdefghi', 'admin');
 
 -- Inserir alguns talentos de exemplo - apenas se não existirem
-INSERT IGNORE INTO talents (name, email, phone, skills, experience_years, salary_expectation) VALUES 
+INSERT IGNORE INTO talents (nome, email, phone, skills, experience_years, salary_expectation) VALUES 
 ('João Silva', 'joao@email.com', '(11) 99999-9999', 'PHP, MySQL, JavaScript, Laravel', 5, 8000.00),
 ('Maria Santos', 'maria@email.com', '(11) 88888-8888', 'React, Node.js, TypeScript', 3, 7000.00),
 ('Pedro Costa', 'pedro@email.com', '(11) 77777-7777', 'Python, Django, PostgreSQL', 4, 7500.00); 

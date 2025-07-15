@@ -6,12 +6,11 @@ class User {
     private $table_name = "users";
 
     public $id;
-    public $name;
+    public $nome;
     public $email;
     public $password;
-    public $role;
-    public $created_at;
-    public $updated_at;
+    public $tipo;
+    public $criado_em;
 
     public function __construct($db) {
         $this->conn = $db;
@@ -20,22 +19,22 @@ class User {
     // Criar usuário
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                  (name, email, password, role) 
-                  VALUES (:name, :email, :password, :role)";
+          (nome, email, password, tipo) 
+          VALUES (:nome, :email, :password, :tipo)";
 
         $stmt = $this->conn->prepare($query);
 
         // Sanitizar dados
-        $this->name = htmlspecialchars(strip_tags($this->name));
+        $this->nome = htmlspecialchars(strip_tags($this->nome));
         $this->email = htmlspecialchars(strip_tags($this->email));
         $this->password = password_hash($this->password, PASSWORD_DEFAULT);
-        $this->role = htmlspecialchars(strip_tags($this->role));
+        $this->tipo = htmlspecialchars(strip_tags($this->tipo));
 
         // Bind dos parâmetros
-        $stmt->bindParam(":name", $this->name);
+        $stmt->bindParam(":nome", $this->nome);
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":password", $this->password);
-        $stmt->bindParam(":role", $this->role);
+        $stmt->bindParam(":tipo", $this->tipo);
 
         if($stmt->execute()) {
             return true;
@@ -45,7 +44,7 @@ class User {
 
     // Ler todos os usuários
     public function read() {
-        $query = "SELECT id, name, email, role, created_at FROM " . $this->table_name . " ORDER BY created_at DESC";
+        $query = "SELECT id, nome, email, tipo, created_at FROM " . $this->table_name . " ORDER BY created_at DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
@@ -53,7 +52,7 @@ class User {
 
     // Ler um usuário específico
     public function readOne() {
-        $query = "SELECT id, name, email, role, created_at FROM " . $this->table_name . " WHERE id = ? LIMIT 0,1";
+        $query = "SELECT id, nome, email, tipo, created_at FROM " . $this->table_name . " WHERE id = ? LIMIT 0,1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $this->id);
         $stmt->execute();
@@ -62,7 +61,7 @@ class User {
         if($row) {
             $this->name = $row['name'];
             $this->email = $row['email'];
-            $this->role = $row['role'];
+            $this->tipo = $row['tipo'];
             $this->created_at = $row['created_at'];
             return true;
         }
@@ -72,7 +71,7 @@ class User {
     // Atualizar usuário
     public function update() {
         $query = "UPDATE " . $this->table_name . " 
-                  SET name = :name, email = :email, role = :role 
+                  SET name = :name, email = :email, tipo = :tipo 
                   WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
@@ -80,13 +79,13 @@ class User {
         // Sanitizar dados
         $this->name = htmlspecialchars(strip_tags($this->name));
         $this->email = htmlspecialchars(strip_tags($this->email));
-        $this->role = htmlspecialchars(strip_tags($this->role));
+        $this->tipo = htmlspecialchars(strip_tags($this->tipo));
         $this->id = htmlspecialchars(strip_tags($this->id));
 
         // Bind dos parâmetros
-        $stmt->bindParam(':name', $this->name);
+        $stmt->bindParam(':nome', $this->nome);
         $stmt->bindParam(':email', $this->email);
-        $stmt->bindParam(':role', $this->role);
+        $stmt->bindParam(':tipo', $this->tipo);
         $stmt->bindParam(':id', $this->id);
 
         if($stmt->execute()) {
@@ -110,17 +109,17 @@ class User {
 
     // Autenticar usuário
     public function authenticate($email, $password) {
-        $query = "SELECT id, name, email, password, role FROM " . $this->table_name . " WHERE email = ?";
+        $query = "SELECT id, nome, email, password, tipo FROM users WHERE email = :email";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $email);
+        $stmt->bindParam(':email', $email);
         $stmt->execute();
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if($row && password_verify($password, $row['password'])) {
             $this->id = $row['id'];
-            $this->name = $row['name'];
+            $this->nome = $row['nome'];
             $this->email = $row['email'];
-            $this->role = $row['role'];
+            $this->tipo = $row['tipo'];
             return true;
         }
         return false;

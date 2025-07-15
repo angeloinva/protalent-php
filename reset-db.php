@@ -2,9 +2,9 @@
 echo "<h1>🔄 Reset do Banco de Dados - ProTalent</h1>";
 
 $host = 'localhost';
-$username = 'root';
+$username = 'protalentappbr_root';
 $password = 'AtivaFps123-';
-$dbname = 'protalent';
+$dbname = 'protalentappbr_protalent';
 
 echo "<div style='font-family: Arial, sans-serif; margin: 20px;'>";
 

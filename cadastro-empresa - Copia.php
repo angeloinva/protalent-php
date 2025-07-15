@@ -19,18 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (strlen($cnpj) != 14) {
         $error = 'CNPJ inválido!';
     } else {
-        // Verificar se empresa já existe pelo email
-        $existingEmail = $empresa->readByEmail($_POST['email']);
-        // Verificar se empresa já existe pelo CNPJ (sem máscara)
-        $existingCnpj = $empresa->readByCnpj($cnpj);
-
-        if ($existingEmail) {
+        // Verificar se empresa já existe
+        $existing = $empresa->readByEmail($_POST['email']);
+        if ($existing) {
             $error = 'Já existe uma empresa cadastrada com este email!';
-        } elseif ($existingCnpj) {
-            $error = 'Já existe uma empresa cadastrada com este CNPJ!';
         } else {
-            // Salvar o CNPJ sem máscara
-            $empresa->cnpj = $cnpj;
+            $empresa->cnpj = $_POST['cnpj'];
             $empresa->razao_social = $_POST['razao_social'];
             $empresa->nome_fantasia = $_POST['nome_fantasia'];
             $empresa->nome_mentor = $_POST['nome_mentor'];
@@ -464,31 +458,68 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     console.error('✗ Elemento loading não encontrado');
                 }
-
-                // Buscar dados reais da ReceitaWS
-                fetch('verifica_cnpj.php?cnpj=' + cnpj)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (loadingElement) loadingElement.style.display = 'none';
-                        if (data.status === 'OK') {
-                            preencherDadosEmpresa(
-                                data.razao_social || '',
-                                data.fantasia || '',
-                                data.cep || '',
-                                data.logradouro ? (data.logradouro + (data.numero ? ', ' + data.numero : '')) : '',
-                                data.bairro || '',
-                                data.municipio || '',
-                                data.uf || ''
-                            );
-                        } else {
-                            alert(data.error || 'CNPJ não encontrado ou inválido!');
-                        }
-                    })
-                    .catch(error => {
-                        if (loadingElement) loadingElement.style.display = 'none';
-                        alert('Erro ao buscar dados do CNPJ!');
-                        console.error(error);
-                    });
+                
+                // Simular busca de CNPJ
+                setTimeout(() => {
+                    // Esconder loading
+                    if (loadingElement) {
+                        loadingElement.style.display = 'none';
+                        console.log('✓ Loading ocultado');
+                    }
+                    
+                    console.log('=== INICIANDO PREENCHIMENTO PARA CNPJ:', cnpj, '===');
+                    
+                    // Dados específicos para CNPJs de teste
+                    if (cnpj === '00000000000000') {
+                        console.log('🎯 Preenchendo dados da Empresa Exemplo');
+                        preencherDadosEmpresa(
+                            'Empresa Exemplo LTDA',
+                            'Empresa Exemplo',
+                            '01234-567',
+                            'Rua Exemplo, 123',
+                            'Centro',
+                            'São Paulo',
+                            'SP'
+                        );
+                    } else if (cnpj === '12345678000190') {
+                        console.log('🎯 Preenchendo dados da Tech Solutions');
+                        preencherDadosEmpresa(
+                            'Tech Solutions LTDA',
+                            'Tech Solutions',
+                            '04567-890',
+                            'Av. Paulista, 1000',
+                            'Bela Vista',
+                            'São Paulo',
+                            'SP'
+                        );
+                    } else if (cnpj === '98765432000110') {
+                        console.log('🎯 Preenchendo dados da Inovação Digital');
+                        preencherDadosEmpresa(
+                            'Inovação Digital ME',
+                            'Inovação Digital',
+                            '20040-007',
+                            'Rua do Ouvidor, 50',
+                            'Centro',
+                            'Rio de Janeiro',
+                            'RJ'
+                        );
+                    } else {
+                        console.log('🎯 Preenchendo dados genéricos para CNPJ:', cnpj);
+                        // Para qualquer CNPJ válido, preencher com dados genéricos
+                        const nomeEmpresa = 'Empresa ' + cnpj.substring(0, 4);
+                        preencherDadosEmpresa(
+                            nomeEmpresa + ' LTDA',
+                            nomeEmpresa,
+                            '00000-000',
+                            'Endereço da Empresa',
+                            'Bairro',
+                            'Cidade',
+                            'SP'
+                        );
+                    }
+                    
+                    console.log('✅ Preenchimento concluído com sucesso');
+                }, 1000);
             } else {
                 console.log('❌ CNPJ inválido ou incompleto (tamanho:', cnpj.length, ')');
             }

@@ -1,8 +1,8 @@
 <?php
 class Database {
     private $host = 'localhost';
-    private $db_name = 'protalent';
-    private $username = 'root';
+    private $db_name = 'protalentappbr_protalent';
+    private $username = 'protalentappbr_root';
     private $password = 'AtivaFps123-';
     private $conn;
 

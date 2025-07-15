@@ -3,9 +3,9 @@ echo "<h1>🧪 Teste de Conectividade com Banco de Dados</h1>";
 
 // Configurações para teste
 $host = 'localhost';
-$username = 'root';
+$username = 'protalentappbr_root';
 $password = 'AtivaFps123-';
-$dbname = 'protalent';
+$dbname = 'protalentappbr_protalent';
 
 echo "<h2>1. Testando conexão básica com MySQL</h2>";
 

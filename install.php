@@ -34,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif ($step == 2) {
         // Configurar banco de dados
         $host = $_POST['host'] ?? 'localhost';
-        $dbname = $_POST['dbname'] ?? 'protalent';
-        $username = $_POST['username'] ?? 'protuser';
-        $password = $_POST['password'] ?? 'Protuser1--';
+        $dbname = $_POST['dbname'] ?? 'protalentappbr_protalent';
+        $username = $_POST['username'] ?? 'protalentappbr_root';
+        $password = $_POST['password'] ?? 'AtivaFps123-';
         
         try {
             // Teste de conexão inicial
@@ -212,19 +212,19 @@ class Database {
                                     <div class="col-md-6 mb-3">
                                         <label for="dbname" class="form-label">Nome do Banco</label>
                                         <input type="text" class="form-control" id="dbname" name="dbname" 
-                                               value="<?php echo $_POST['dbname'] ?? 'protalent'; ?>" required>
+                                               value="<?php echo $_POST['dbname'] ?? 'protalentappbr_protalent'; ?>" required>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="username" class="form-label">Usuário</label>
                                         <input type="text" class="form-control" id="username" name="username" 
-                                               value="<?php echo $_POST['username'] ?? 'root'; ?>" required>
+                                               value="<?php echo $_POST['username'] ?? 'protalentappbr_root'; ?>" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="password" class="form-label">Senha</label>
                                         <input type="password" class="form-control" id="password" name="password" 
-                                               value="<?php echo $_POST['password'] ?? ''; ?>">
+                                               value="<?php echo $_POST['password'] ?? 'AtivaFps123-'; ?>">
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between">

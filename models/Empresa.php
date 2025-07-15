@@ -79,6 +79,14 @@ class Empresa {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function readByCnpj($cnpj) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE cnpj = :cnpj LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':cnpj', $cnpj);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function authenticate($email, $password) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE email = :email";
         $stmt = $this->conn->prepare($query);
