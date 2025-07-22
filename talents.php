@@ -122,67 +122,42 @@ include 'includes/header.php';
     </div>
 
     <!-- Tabela de Talentos -->
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Email</th>
-                            <th>Telefone</th>
-                            <th>Habilidades</th>
-                            <th>Experiência</th>
-                            <th>Salário Esperado</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php 
-                        $talents = $talent->read();
-                        while ($row = $talents->fetch(PDO::FETCH_ASSOC)): 
-                        ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($row['name']); ?></td>
-                            <td><?php echo htmlspecialchars($row['email']); ?></td>
-                            <td><?php echo htmlspecialchars($row['phone']); ?></td>
-                            <td>
-                                <small class="text-muted">
-                                    <?php echo htmlspecialchars(substr($row['skills'], 0, 50)) . (strlen($row['skills']) > 50 ? '...' : ''); ?>
-                                </small>
-                            </td>
-                            <td><?php echo $row['experience_years']; ?> anos</td>
-                            <td>R$ <?php echo number_format($row['salary_expectation'], 2, ',', '.'); ?></td>
-                            <td>
-                                <span class="badge bg-<?php 
-                                    echo $row['status'] == 'available' ? 'success' : 
-                                        ($row['status'] == 'hired' ? 'danger' : 'secondary'); 
-                                ?>">
-                                    <?php echo ucfirst($row['status']); ?>
-                                </span>
-                            </td>
-                            <td>
-                                <a href="?action=view&id=<?php echo $row['id']; ?>" 
-                                   class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="?action=edit&id=<?php echo $row['id']; ?>" 
-                                   class="btn btn-sm btn-outline-warning">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button type="button" class="btn btn-sm btn-outline-danger" 
-                                        onclick="confirmDelete(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars($row['name']); ?>')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
+    <div class="row">
+<?php 
+$talents = $talent->read();
+while ($row = $talents->fetch(PDO::FETCH_ASSOC)): ?>
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card card-talent">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fas fa-user-tie fa-2x text-primary me-3"></i>
+                    <div>
+                        <div class="card-title mb-0"><?= htmlspecialchars($row['name']) ?></div>
+                        <div class="text-muted" style="font-size:0.95em;"> <?= htmlspecialchars($row['email']) ?> </div>
+                    </div>
+                </div>
+                <div class="mb-2"><i class="fas fa-phone me-1"></i><?= htmlspecialchars($row['phone']) ?></div>
+                <div class="mb-2"><i class="fas fa-cogs me-1"></i><span class="text-muted">Habilidades:</span> <?= htmlspecialchars(substr($row['skills'], 0, 60)) . (strlen($row['skills']) > 60 ? '...' : '') ?></div>
+                <div class="mb-2"><i class="fas fa-briefcase me-1"></i><?= $row['experience_years'] ?> anos <span class="text-muted">experiência</span></div>
+                <div class="mb-2"><i class="fas fa-money-bill-wave me-1"></i>R$ <?= number_format($row['salary_expectation'], 2, ',', '.') ?></div>
+                <div class="mb-2">
+                    <span class="badge bg-<?php 
+                        echo $row['status'] == 'available' ? 'success' : 
+                            ($row['status'] == 'hired' ? 'danger' : 'secondary'); 
+                    ?>">
+                        <?php echo ucfirst($row['status']); ?>
+                    </span>
+                </div>
+                <div class="d-flex gap-2 justify-content-end mt-3">
+                    <a href="?action=view&id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
+                    <a href="?action=edit&id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete(<?= $row['id'] ?>, '<?= htmlspecialchars($row['name']) ?>')"><i class="fas fa-trash"></i></button>
+                </div>
             </div>
         </div>
     </div>
+<?php endwhile; ?>
+</div>
 
 <?php elseif ($action == 'create' || $action == 'edit'): ?>
     <!-- Formulário de Criação/Edição -->
@@ -273,8 +248,17 @@ include 'includes/header.php';
     <?php 
     $talent->id = $_GET['id'] ?? '';
     $talent->readOne();
+    // Buscar informações de equipe, professor e desafio
+    $sql = 'SELECT a.nome AS aluno_nome, a.email AS aluno_email, a.whatsapp AS aluno_whatsapp, e.nome AS equipe_nome, p.nome AS professor_nome, p.instituicao AS professor_instituicao, d.titulo AS desafio_titulo
+            FROM alunos a
+            JOIN equipes e ON a.equipe_id = e.id
+            JOIN professores p ON e.professor_id = p.id
+            JOIN desafios d ON e.desafio_id = d.id
+            WHERE a.email = ? LIMIT 1';
+    $stmt = $db->prepare($sql);
+    $stmt->execute([$talent->email]);
+    $info = $stmt->fetch(PDO::FETCH_ASSOC);
     ?>
-    
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-0">
@@ -282,7 +266,6 @@ include 'includes/header.php';
             </h1>
         </div>
     </div>
-
     <div class="card">
         <div class="card-body">
             <div class="row">
@@ -304,14 +287,18 @@ include 'includes/header.php';
                             <?php echo ucfirst($talent->status); ?>
                         </span>
                     </p>
+                    <?php if ($info): ?>
+                        <hr>
+                        <p><strong>Professor:</strong> <?php echo htmlspecialchars($info['professor_nome']); ?></p>
+                        <p><strong>Instituição de Ensino:</strong> <?php echo htmlspecialchars($info['professor_instituicao']); ?></p>
+                        <p><strong>Desafio:</strong> <?php echo htmlspecialchars($info['desafio_titulo']); ?></p>
+                    <?php endif; ?>
                 </div>
             </div>
-            
             <div class="mt-4">
                 <h5>Habilidades</h5>
                 <p><?php echo nl2br(htmlspecialchars($talent->skills)); ?></p>
             </div>
-            
             <div class="mt-4">
                 <a href="talents.php" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Voltar

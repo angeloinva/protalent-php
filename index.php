@@ -165,7 +165,7 @@ include 'includes/header.php';
                     <p class="user-type-description">
                         Explore desafios reais das empresas e participe de projetos inovadores com seus alunos.
                     </p>
-                    <a href="professor-dashboard.php" class="btn btn-user-type">
+                    <a href="desafios-professor.php" class="btn btn-user-type">
                         <i class="fas fa-arrow-right me-2"></i>Acessar
                     </a>
                 </div>

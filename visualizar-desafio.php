@@ -263,38 +263,7 @@ include 'includes/header.php';
         </div>
         
         <div class="col-md-4">
-            <div class="contact-section">
-                <h3 class="contact-title">
-                    <i class="fas fa-phone me-2"></i>Informações de Contato
-                </h3>
-                
-                <div class="contact-info">
-                    <i class="fas fa-user"></i>
-                    <span><strong>Mentor:</strong> <?php echo htmlspecialchars($desafio_data['mentor']); ?></span>
-                </div>
-                
-                <?php if ($desafio_data['whatsapp']): ?>
-                <div class="contact-info">
-                    <i class="fab fa-whatsapp"></i>
-                    <span><strong>WhatsApp:</strong> <?php echo htmlspecialchars($desafio_data['whatsapp']); ?></span>
-                </div>
-                <?php endif; ?>
-                
-                <div class="text-center">
-                    <?php if ($desafio_data['whatsapp']): ?>
-                        <a href="https://wa.me/<?php echo preg_replace('/[^0-9]/', '', $desafio_data['whatsapp']); ?>?text=Olá! Tenho interesse no desafio: <?php echo urlencode($desafio_data['titulo']); ?>" 
-                           target="_blank" class="btn btn-contact">
-                            <i class="fab fa-whatsapp me-2"></i>Contatar via WhatsApp
-                        </a>
-                    <?php else: ?>
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            WhatsApp não informado para contato.
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            
+            <!-- Removido: card de informações de contato -->
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">

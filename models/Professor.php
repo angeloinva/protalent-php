@@ -111,5 +111,23 @@ class Professor {
         $stmt->bindParam(":interesse", $interesse);
         return $stmt->execute();
     }
+
+    public function authenticate($email, $password) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":email", $email);
+        $stmt->execute();
+        $professor = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($professor && isset($professor['password']) && password_verify($password, $professor['password'])) {
+            $this->id = $professor['id'];
+            $this->nome = $professor['nome'];
+            $this->email = $professor['email'];
+            $this->whatsapp = $professor['whatsapp'];
+            $this->instituicao = $professor['instituicao'];
+            $this->area_atuacao = $professor['area_atuacao'];
+            return true;
+        }
+        return false;
+    }
 }
 ?> 

@@ -35,7 +35,10 @@ $desafios = $desafio->readWithFilters($filtro_empresa, $filtro_cidade, $filtro_d
 $total_desafios = $desafio->count();
 $total_empresas = $empresa->count();
 $total_professores = $professor->countInteressados(); // Apenas professores interessados
-$total_talentos = $talent->count();
+// Contar total de alunos (talentos)
+$stmtTalentos = $db->prepare('SELECT COUNT(*) as total FROM alunos');
+$stmtTalentos->execute();
+$total_talentos = $stmtTalentos->fetchColumn();
 
 // Buscar empresas para filtro
 $empresas = $empresa->read();
@@ -216,12 +219,13 @@ include 'includes/header.php';
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="stats-card">
+            <div class="stats-card" style="cursor:pointer;" onclick="window.location.href='empresas-lista.php'">
                 <div class="stats-icon text-success">
                     <i class="fas fa-building"></i>
                 </div>
                 <div class="stats-number text-success"><?php echo $total_empresas; ?></div>
                 <div class="stats-label">Total de Empresas</div>
+                <small class="text-muted">Clique para ver detalhes</small>
             </div>
         </div>
         <div class="col-md-3 mb-3">
@@ -235,12 +239,13 @@ include 'includes/header.php';
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="stats-card">
+            <div class="stats-card" style="cursor:pointer;" onclick="window.location.href='alunos-lista.php'">
                 <div class="stats-icon text-warning">
                     <i class="fas fa-user-tie"></i>
                 </div>
                 <div class="stats-number text-warning"><?php echo $total_talentos; ?></div>
                 <div class="stats-label">Talentos Cadastrados</div>
+                <small class="text-muted">Clique para ver detalhes</small>
             </div>
         </div>
     </div>
@@ -346,10 +351,18 @@ include 'includes/header.php';
                                                 <?php echo htmlspecialchars($row['nivel_trl']); ?>
                                             </span>
                                         <?php endif; ?>
+                                        <?php 
+                                        $stmtEq = $db->prepare('SELECT COUNT(*) FROM equipes WHERE desafio_id = ?');
+                                        $stmtEq->execute([$row['id']]);
+                                        $qtde_equipes = $stmtEq->fetchColumn();
+                                        ?>
                                         <span class="desafio-status status-<?php echo $row['status']; ?>">
                                             <?php 
-                                            echo $row['status'] == 'ativo' ? 'Ativo' : 
-                                                ($row['status'] == 'em_andamento' ? 'Em Andamento' : 'Concluído'); 
+                                            if ($row['status'] == 'ativo') {
+                                                echo $qtde_equipes . ' equipe' . ($qtde_equipes == 1 ? '' : 's');
+                                            } else {
+                                                echo $row['status'] == 'em_andamento' ? 'Em Andamento' : 'Concluído';
+                                            }
                                             ?>
                                         </span>
                                     </div>
@@ -363,23 +376,10 @@ include 'includes/header.php';
                                        class="btn btn-outline-warning btn-action">
                                         <i class="fas fa-edit me-1"></i>Editar
                                     </a>
-                                    <?php if ($row['whatsapp']): ?>
-                                        <a href="https://wa.me/<?php echo preg_replace('/[^0-9]/', '', $row['whatsapp']); ?>?text=Olá! Tenho interesse no desafio: <?php echo urlencode($row['titulo']); ?>" 
-                                           target="_blank" class="btn btn-outline-success btn-action">
-                                            <i class="fab fa-whatsapp me-1"></i>Contatar
-                                        </a>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="admin-actions">
-                                    <h6><i class="fas fa-shield-alt me-1"></i>Ações Administrativas</h6>
                                     <a href="excluir-desafio.php?id=<?php echo $row['id']; ?>" 
-                                       class="btn btn-outline-danger btn-sm"
+                                       class="btn btn-outline-danger btn-action"
                                        onclick="return confirm('Tem certeza que deseja excluir este desafio?')">
                                         <i class="fas fa-trash me-1"></i>Excluir
-                                    </a>
-                                    <a href="gerenciar-empresa.php?id=<?php echo $row['empresa_id']; ?>" 
-                                       class="btn btn-outline-info btn-sm">
-                                        <i class="fas fa-building me-1"></i>Gerenciar Empresa
                                     </a>
                                 </div>
                             </div>

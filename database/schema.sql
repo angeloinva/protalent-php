@@ -80,6 +80,55 @@ CREATE TABLE IF NOT EXISTS desafios (
     FOREIGN KEY (empresa_id) REFERENCES empresas(id) ON DELETE CASCADE
 );
 
+-- Tabela de equipes (cada equipe pertence a um professor e a um desafio)
+CREATE TABLE IF NOT EXISTS equipes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    professor_id INT NOT NULL,
+    desafio_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (professor_id) REFERENCES professores(id) ON DELETE CASCADE,
+    FOREIGN KEY (desafio_id) REFERENCES desafios(id) ON DELETE CASCADE
+);
+
+-- Tabela de alunos (cada aluno pertence a uma equipe)
+CREATE TABLE IF NOT EXISTS alunos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    whatsapp VARCHAR(20),
+    equipe_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE CASCADE
+);
+
+-- Tabela de andamento das soluções (cada registro vincula equipe e desafio)
+CREATE TABLE IF NOT EXISTS andamento_solucoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    equipe_id INT NOT NULL,
+    desafio_id INT NOT NULL,
+    status VARCHAR(100),
+    descricao TEXT,
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE CASCADE,
+    FOREIGN KEY (desafio_id) REFERENCES desafios(id) ON DELETE CASCADE
+);
+
+-- Tabela de soluções finais (cada equipe pode ter uma solução final por desafio)
+CREATE TABLE IF NOT EXISTS solucoes_finais (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    equipe_id INT NOT NULL,
+    desafio_id INT NOT NULL,
+    descricao TEXT NOT NULL,
+    arquivo VARCHAR(255) DEFAULT NULL,
+    url_video VARCHAR(255) DEFAULT NULL,
+    data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE CASCADE,
+    FOREIGN KEY (desafio_id) REFERENCES desafios(id) ON DELETE CASCADE
+);
+
 -- Inserir usuário admin padrão (senha: admin123) - apenas se não existir
 INSERT IGNORE INTO users (nome, email, password, tipo) VALUES 
 ('Administrador', 'admin@protalent.com', '$2y$10$abcdefghijklmnopqrstuv1234567890abcdefghi1234567890abcdefghi', 'admin');

@@ -6,6 +6,10 @@
     <title>ProTalent - Sistema de Gerenciamento de Talentos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/site.webmanifest">
     <style>
         .navbar-brand {
             font-weight: bold;
@@ -36,7 +40,16 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="index.php">
+            <a class="navbar-brand" href="<?php
+    $basename = basename($_SERVER['PHP_SELF']);
+    if ($basename === 'desafios-professor.php') {
+        echo 'professor-dashboard.php';
+    } else if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'admin') {
+        echo 'admin-dashboard.php';
+    } else {
+        echo 'index.php';
+    }
+?>">
                 <img src="imgs/logo_protalent_preto.png" alt="ProTalent" height="30" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
                 <i class="fas fa-users me-2" style="display: none;">ProTalent</i>
             </a>
@@ -45,11 +58,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php">
-                            <i class="fas fa-home me-1"></i>Início
-                        </a>
-                    </li>
                     <?php if(isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'admin'): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="admin-dashboard.php">
@@ -65,10 +73,21 @@
                     <?php endif; ?>
                 </ul>
                 <ul class="navbar-nav">
-                    <?php if(isset($_SESSION['user_id'])): ?>
+                    <?php if(isset($_SESSION['user_id']) || isset($_SESSION['empresa_id']) || isset($_SESSION['professor_id'])): ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i><?php echo $_SESSION['user_name']; ?>
+                                <i class="fas fa-user me-1"></i>
+                                <?php
+                                if (isset($_SESSION['user_name'])) {
+                                    echo htmlspecialchars($_SESSION['user_name']);
+                                } elseif (isset($_SESSION['empresa_nome'])) {
+                                    echo htmlspecialchars($_SESSION['empresa_nome']);
+                                } elseif (isset($_SESSION['professor_nome'])) {
+                                    echo htmlspecialchars($_SESSION['professor_nome']);
+                                } else {
+                                    echo 'Usuário';
+                                }
+                                ?>
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="profile.php">Perfil</a></li>
