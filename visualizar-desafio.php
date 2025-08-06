@@ -278,10 +278,134 @@ include 'includes/header.php';
                         <li>Apresente sua proposta de solução</li>
                         <li>Aguarde a aprovação da empresa</li>
                     </ol>
+                    
+                    <?php if (isset($_SESSION['professor_id'])): ?>
+                        <?php
+                        // Verificar se o professor já tem uma equipe para este desafio
+                        $stmtVerificarEquipe = $db->prepare('SELECT id FROM equipes WHERE professor_id = ? AND desafio_id = ?');
+                        $stmtVerificarEquipe->execute([$_SESSION['professor_id'], $desafio_id]);
+                        $equipeExistente = $stmtVerificarEquipe->fetch(PDO::FETCH_ASSOC);
+                        ?>
+                        
+                        <hr class="my-3">
+                        
+                        <?php if ($equipeExistente): ?>
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Você já está participando deste desafio!</strong>
+                            </div>
+                            <a href="desafio-andamento.php?equipe_id=<?= $equipeExistente['id'] ?>&desafio_id=<?= $desafio_id ?>" 
+                               class="btn btn-primary w-100">
+                                <i class="fas fa-tasks me-2"></i>Gerenciar Meu Desafio
+                            </a>
+                        <?php else: ?>
+                            <div class="alert alert-info">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>Professor, que tal participar deste desafio?</strong>
+                            </div>
+                            <a href="cadastrar-equipe.php?desafio_id=<?= $desafio_id ?>" 
+                               class="btn btn-success w-100">
+                                <i class="fas fa-plus me-2"></i>Participar do Desafio
+                            </a>
+                        <?php endif; ?>
+                    <?php elseif (!isset($_SESSION['user_id']) && !isset($_SESSION['empresa_id'])): ?>
+                        <hr class="my-3">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-user-graduate me-2"></i>
+                            <strong>Professor?</strong> Faça login para participar!
+                        </div>
+                        <a href="login.php" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Fazer Login
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+<div class="container mt-5">
+    <div class="desafio-section">
+        <h3 class="section-title">
+            <i class="fas fa-users me-2"></i>Equipes Desenvolvendo Soluções
+        </h3>
+        <?php
+        // Buscar equipes deste desafio
+        $stmtEquipes = $db->prepare('SELECT equipes.*, professores.nome AS professor_nome FROM equipes JOIN professores ON equipes.professor_id = professores.id WHERE equipes.desafio_id = ?');
+        $stmtEquipes->execute([$desafio_id]);
+        $equipes = $stmtEquipes->fetchAll(PDO::FETCH_ASSOC);
+        if (count($equipes) === 0): ?>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Nenhuma equipe cadastrada para este desafio.
+            </div>
+        <?php else: ?>
+            <div class="row">
+                <?php foreach ($equipes as $equipe): ?>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 shadow-sm border-0" style="border-radius: 15px;">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h5 class="card-title mb-0 text-primary">
+                                        <i class="fas fa-users me-2"></i>
+                                        <?= htmlspecialchars($equipe['nome']) ?>
+                                    </h5>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="visualizar-equipe.php?id=<?= $equipe['id'] ?>">
+                                                    <i class="fas fa-eye me-2"></i>Visualizar
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="editar-equipe.php?id=<?= $equipe['id'] ?>">
+                                                    <i class="fas fa-edit me-2"></i>Editar
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="excluir-equipe.php?id=<?= $equipe['id'] ?>&desafio_id=<?= $desafio_id ?>" 
+                                                   onclick="return confirm('Tem certeza que deseja excluir esta equipe?');">
+                                                    <i class="fas fa-trash me-2"></i>Excluir
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="equipe-info">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-chalkboard-teacher text-info me-2"></i>
+                                        <span class="text-muted"><?= htmlspecialchars($equipe['professor_nome']) ?></span>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-calendar text-success me-2"></i>
+                                        <span class="text-muted">Criada em <?= date('d/m/Y', strtotime($equipe['created_at'])) ?></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2 mt-3">
+                                    <a href="visualizar-equipe.php?id=<?= $equipe['id'] ?>" 
+                                       class="btn btn-sm btn-outline-primary flex-fill">
+                                        <i class="fas fa-eye me-1"></i>Ver Detalhes
+                                    </a>
+                                    <a href="editar-equipe.php?id=<?= $equipe['id'] ?>" 
+                                       class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
 
 <?php include 'includes/footer.php'; ?> 

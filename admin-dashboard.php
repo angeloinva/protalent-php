@@ -35,6 +35,7 @@ $desafios = $desafio->readWithFilters($filtro_empresa, $filtro_cidade, $filtro_d
 $total_desafios = $desafio->count();
 $total_empresas = $empresa->count();
 $total_professores = $professor->countInteressados(); // Apenas professores interessados
+$total_professores_cadastrados = $professor->count(); // Todos os professores cadastrados
 // Contar total de alunos (talentos)
 $stmtTalentos = $db->prepare('SELECT COUNT(*) as total FROM alunos');
 $stmtTalentos->execute();
@@ -209,7 +210,7 @@ include 'includes/header.php';
 <div class="container">
     <!-- Estatísticas -->
     <div class="row mb-3">
-        <div class="col-md-3 mb-3">
+        <div class="col-12 col-md mb-3">
             <div class="stats-card">
                 <div class="stats-icon text-primary">
                     <i class="fas fa-lightbulb"></i>
@@ -218,7 +219,7 @@ include 'includes/header.php';
                 <div class="stats-label">Total de Desafios</div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-12 col-md mb-3">
             <div class="stats-card" style="cursor:pointer;" onclick="window.location.href='empresas-lista.php'">
                 <div class="stats-icon text-success">
                     <i class="fas fa-building"></i>
@@ -228,7 +229,7 @@ include 'includes/header.php';
                 <small class="text-muted">Clique para ver detalhes</small>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-12 col-md mb-3">
             <div class="stats-card" style="cursor: pointer;" onclick="window.location.href='professores-interessados.php'">
                 <div class="stats-icon text-info">
                     <i class="fas fa-chalkboard-teacher"></i>
@@ -238,7 +239,16 @@ include 'includes/header.php';
                 <small class="text-muted">Clique para ver detalhes</small>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-12 col-md mb-3">
+            <div class="stats-card">
+                <div class="stats-icon text-secondary">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="stats-number text-secondary"><?php echo $total_professores_cadastrados; ?></div>
+                <div class="stats-label">Professores Cadastrados</div>
+            </div>
+        </div>
+        <div class="col-12 col-md mb-3">
             <div class="stats-card" style="cursor:pointer;" onclick="window.location.href='alunos-lista.php'">
                 <div class="stats-icon text-warning">
                     <i class="fas fa-user-tie"></i>
